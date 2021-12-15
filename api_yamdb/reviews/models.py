@@ -1,7 +1,17 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator 
 from django.db import models
 
 User = get_user_model()
+
+
+class Category(models.Model):
+    pass
+
+
+class Genre(models.Model):
+    pass
+
 
 class Titles(models.Model):
     pass
@@ -19,7 +29,9 @@ class Review(models.Model):
         related_name='reviews'
     )
     text = models.TextField()
-    score = models.PositiveSmallIntegerField() #TODO: set up paramters for the field
+    score = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
     pub_date = models.DateTimeField(
         'Дата добавления',
         auto_now_add=True,
