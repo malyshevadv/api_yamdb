@@ -47,7 +47,7 @@ class UserViewSet(ModelViewSet):
 
 
 class UserMe(RetrieveAPIView, UpdateAPIView):
-    """View для users/me/"""
+    """View для users/me/."""
 
     serializer_class = MeSerializer
 
@@ -58,6 +58,13 @@ class UserMe(RetrieveAPIView, UpdateAPIView):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def signup(request):
+    """Регистрация пользователя.
+
+    Создает нового пользователя, отправляет на указанный email код
+    подтверждения.
+    Если пользователь с полученными username и email уже существует -
+    отправляет ему код подтверждения.
+    """
     user = User.objects.filter(
         username=request.data.get('username'),
         email=request.data.get('email')
@@ -81,6 +88,10 @@ def signup(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def get_token(request):
+    """Получение JWT-токена.
+
+    Если полученный код подтверждения валиден - отправляет юзеру JWT-токен.
+    """
     serializer = TokenSerializer(data=request.data)
 
     if serializer.is_valid():
@@ -102,4 +113,3 @@ def get_token(request):
             status=status.HTTP_400_BAD_REQUEST)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
