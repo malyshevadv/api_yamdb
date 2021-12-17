@@ -4,6 +4,43 @@ from rest_framework import validators, serializers
 from reviews.models import Category, Comment, Genre, Review, Titles
 
 
+User = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'bio',
+                  'role']
+
+
+class MeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'bio',
+                  'role']
+        read_only_fields = ['role']
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Использовать имя "me" в качестве username запрещено.')
+
+        return value
+
+
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    confirmation_code = serializers.CharField()
+
+
+
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
