@@ -10,10 +10,7 @@ from .permissions import IsAuthorAdminModerOrReadOnly
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-        IsAuthorAdminModerOrReadOnly
-    )
+    permission_classes =  [IsAuthor & IsAdmin & IsModerator | ReadOnly]
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -33,10 +30,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-        IsAuthorAdminModerOrReadOnly
-    )
+    permission_classes =  [IsAuthor & IsAdmin & IsModerator | ReadOnly]
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
