@@ -46,7 +46,7 @@ class TitleGenresLoadSerializer(serializers.Serializer):
     def save(self):
         title = Title.objects.get(id=self.validated_data['title_id'])
         genre = Genre.objects.get(id=self.validated_data['genre_id'])
-        title.genres.add(genre)
+        title.genre.add(genre)
 
 
 class CommentLoadSerializer(serializers.ModelSerializer):
