@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
-from rest_framework import serializers, validators
-
+from django.shortcuts import get_object_or_404
+from rest_framework import validators, serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
 
@@ -15,8 +15,11 @@ class UserSerializer(serializers.ModelSerializer):
                   'role']
 
 
-class MeSerializer(UserSerializer):
-    class Meta(UserSerializer.Meta):
+class MeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'bio',
+                  'role']
         read_only_fields = ['role']
 
 
@@ -44,6 +47,10 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
+    review = serializers.PrimaryKeyRelatedField(
+        read_only=True
+    )
+
 
     class Meta:
         model = Comment
@@ -53,7 +60,8 @@ class CommentSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='username'
+        slug_field='username',
+        default=serializers.CurrentUserDefault(),
     )
     title = serializers.PrimaryKeyRelatedField(
         read_only=True
@@ -62,10 +70,3 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
-        validators = [
-            validators.UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=['author', 'title'],
-                message='Вы уже писали отзыв на это произведение.'
-            )
-        ]

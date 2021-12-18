@@ -8,12 +8,12 @@ from .views import CommentViewSet, ReviewViewSet, UserMe, UserViewSet, get_token
 router = DefaultRouter()
 
 router.register(
-    r'posts\/(?P<title_id>\d+)\/reviews',
+    r'titles\/(?P<title_id>\d+)\/reviews',
     ReviewViewSet,
     basename='reviews'
 )
 router.register(
-    r'posts\/(?P<title_id>\d+)\/reviews(?P<review_id>\d+)\/comments',
+    r'titles\/(?P<title_id>\d+)\/reviews/(?P<review_id>\d+)\/comments',
     CommentViewSet,
     basename='comments'
 )

@@ -1,7 +1,7 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import (
@@ -148,8 +148,12 @@ class ReviewViewSet(ModelViewSet):
         title = get_object_or_404(Title, pk=title_id)
         review_list = title.reviews.all()
         return review_list
-
+    
     def perform_create(self, serializer):
         title_id = self.kwargs.get('title_id')
         title = get_object_or_404(Title, pk=title_id)
-        serializer.save(title=title, author=self.request.user)
+        author = self.request.user
+        if Review.objects.filter(title=title, author=author).exists():
+            raise serializers.ValidationError('Вы уже писали отзыв на это произведение.')
+        else:
+            serializer.save(title=title, author=author)
