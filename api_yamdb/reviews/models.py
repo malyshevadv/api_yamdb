@@ -41,14 +41,14 @@ class Genre(models.Model):
         return self.name
 
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.PositiveIntegerField('Год издания')
     description = models.TextField(
         'Описание',
         blank=True
     )
-    genre = models.ManyToManyField(
+    genres = models.ManyToManyField(
         'Genre',
         related_name='titles',
         verbose_name='Жанры'
@@ -57,7 +57,9 @@ class Titles(models.Model):
         'Category',
         on_delete=models.SET_NULL,
         related_name='titles',
-        verbose_name='Категория'
+        verbose_name='Категория',
+        blank=True,
+        null=True
     )
 
     class Meta:
@@ -71,7 +73,7 @@ class Titles(models.Model):
 
 class Review(models.Model):
     title = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews'
     )

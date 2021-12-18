@@ -1,23 +1,27 @@
+import csv
 import os
 
-from django.core.management.base import BaseCommand
 from django.conf import settings
-import csv
+from django.core.management.base import BaseCommand
 
-from api.serializers import UserSerializer
+from core.serializers import (
+    CategoryLoadSerializer, CommentLoadSerializer,
+    GenreLoadSerializer, ReviewLoadSerializer, TitleGenresLoadSerializer,
+    TitleLoadSerializer, UserLoadSerializer
+)
 
 
 class Command(BaseCommand):
     help = 'Load data from csv to db'
 
     DATA_SERIALIZERS = {
-        'category.csv': ('CategorySerializer', 'category'),
-        'comments.csv': ('CategorySerializer', 'comment'),
-        'genre.csv': ('CategorySerializer', 'genre'),
-        'genre_title.csv': ('CategorySerializer', 'genre_title'),
-        'review.csv': ('CategorySerializer', 'review'),
-        'titles.csv': ('CategorySerializer', 'title'),
-        'users.csv': (UserSerializer, 'user'),
+        'category.csv': (CategoryLoadSerializer, 'category'),
+        'comments.csv': (CommentLoadSerializer, 'comment'),
+        'genre.csv': (GenreLoadSerializer, 'genre'),
+        'genre_title.csv': (TitleGenresLoadSerializer, 'genre_title'),
+        'review.csv': (ReviewLoadSerializer, 'review'),
+        'titles.csv': (TitleLoadSerializer, 'title'),
+        'users.csv': (UserLoadSerializer, 'user'),
     }
 
     def add_arguments(self, parser):
@@ -36,7 +40,6 @@ class Command(BaseCommand):
                     serializer_class, data_name = (
                         self.DATA_SERIALIZERS[name]
                     )
-
                     serializer = serializer_class(data=each)
 
                     if serializer.is_valid():
