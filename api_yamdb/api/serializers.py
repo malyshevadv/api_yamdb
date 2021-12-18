@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
-from rest_framework import validators, serializers
+from rest_framework import serializers, validators
+
 
 from reviews.models import Category, Comment, Genre, Review, Title
 
@@ -14,11 +15,8 @@ class UserSerializer(serializers.ModelSerializer):
                   'role']
 
 
-class MeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'first_name', 'last_name', 'bio',
-                  'role']
+class MeSerializer(UserSerializer):
+    class Meta(UserSerializer.Meta):
         read_only_fields = ['role']
 
 
