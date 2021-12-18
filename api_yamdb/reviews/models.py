@@ -55,6 +55,7 @@ class Titles(models.Model):
     )
     category = models.ForeignKey(
         'Category',
+        null=True,
         on_delete=models.SET_NULL,
         related_name='titles',
         verbose_name='Категория'
