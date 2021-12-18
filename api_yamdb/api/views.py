@@ -14,7 +14,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Review, Title
+
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 from .permissions import IsAdmin, IsAuthor, IsModerator, ReadOnly
 from .serializers import (
