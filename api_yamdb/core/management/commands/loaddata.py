@@ -1,14 +1,12 @@
 import csv
 import os
 
+from core.serializers import (CategoryLoadSerializer, CommentLoadSerializer,
+                              GenreLoadSerializer, ReviewLoadSerializer,
+                              TitleGenresLoadSerializer, TitleLoadSerializer,
+                              UserLoadSerializer)
 from django.conf import settings
 from django.core.management.base import BaseCommand
-
-from core.serializers import (
-    CategoryLoadSerializer, CommentLoadSerializer,
-    GenreLoadSerializer, ReviewLoadSerializer, TitleGenresLoadSerializer,
-    TitleLoadSerializer, UserLoadSerializer
-)
 
 
 class Command(BaseCommand):
