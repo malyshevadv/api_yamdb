@@ -54,5 +54,10 @@ class Command(BaseCommand):
                         )
                     else:
                         self.stdout.write(
-                            self.style.WARNING(serializer.errors)
+                            self.style.ERROR(
+                                'An error occurred while loading {}:{}'.format(
+                                    data_name,
+                                    serializer.errors
+                                )
+                            )
                         )
