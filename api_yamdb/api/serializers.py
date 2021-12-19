@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title
 
+
 User = get_user_model()
 
 
@@ -21,14 +22,17 @@ class MeSerializer(serializers.ModelSerializer):
 
 
 class SignUpSerializer(serializers.ModelSerializer):
+    BANED_USERNAMES = ['me']
+
     class Meta:
         model = User
         fields = ['username', 'email']
 
     def validate_username(self, value):
-        if value == 'me':
+        if value in self.BANED_USERNAMES:
             raise serializers.ValidationError(
-                'Использовать имя "me" в качестве username запрещено.')
+                'Использовать имя "{}" в качестве username запрещено.'.format(
+                    value))
 
         return value
 
