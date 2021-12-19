@@ -288,8 +288,7 @@ Authorization: Bearer <token>
 ```
 GET http://127.0.0.1:8000/api/v1/users/{username}/
 ```
-
-Изменение данных пользователя по username:
+Внесение изменение данных пользователя по username:
 ```
 PATCH http://127.0.0.1:8000/api/v1/users/{username}/
 Content-Type: application/json
@@ -317,7 +316,7 @@ Authorization: Bearer <token>
 GET http://127.0.0.1:8000/api/v1/users/me/
 ```
 
-Изменение данных своей учетной записи:
+Внесение изменение данных своей учетной записи:
 ```
 PATCH http://127.0.0.1:8000/api/v1/users/me/
 Content-Type: application/json
