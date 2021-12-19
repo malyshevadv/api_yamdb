@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Title
+from rest_framework.serializers import UniqueTogetherValidator
 
 
 User = get_user_model()
@@ -69,3 +70,13 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
+
+    def validate(self, attrs):
+        if Review.objects.filter(
+                title_id=self.context['view'].kwargs['title_id'],
+                author=self.context['request'].user
+        ).exists():
+            raise serializers.ValidationError(
+                'Вы уже писали отзыв на это произведение.'
+            )
+        return attrs

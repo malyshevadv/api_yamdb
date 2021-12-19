@@ -100,6 +100,8 @@ class Review(models.Model):
             )
         ]
         ordering = ['pub_date']
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
 
     def __str__(self):
         return self.text
