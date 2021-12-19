@@ -2,6 +2,11 @@ from rest_framework import permissions
 from users.models import User
 
 
+class IsAuthenticated(permissions.IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        return request.user.is_authenticated
+
+
 class ReadOnly(permissions.BasePermission):
     """Разрешает доступ к безопасным методам."""
 
@@ -16,7 +21,7 @@ class IsAuthor(permissions.BasePermission):
     """Разрешает доступ автору."""
 
     def has_object_permission(self, request, view, obj):
-        return request.user and request.user == obj.author
+        return request.user == obj.author
 
 
 class IsAdmin(permissions.BasePermission):
@@ -26,14 +31,14 @@ class IsAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return bool(
-            request.user.is_superuser
-            or request.user.role == User.ADMIN
+            request.user.role == User.ADMIN
+            or request.user.is_superuser
         )
 
     def has_object_permission(self, request, view, obj):
         return bool(
-            request.user.is_superuser
-            or request.user.role == User.ADMIN
+            request.user.role == User.ADMIN
+            or request.user.is_superuser
         )
 
 
@@ -41,4 +46,4 @@ class IsModerator(permissions.BasePermission):
     """Разрешает доступ модератору."""
 
     def has_object_permission(self, request, view, obj):
-        return request.user and request.user.role == User.MODERATOR
+        return request.user.role == User.MODERATOR
