@@ -31,7 +31,7 @@ class Command(BaseCommand):
         for name in file_names:
             path = os.path.join(settings.BASE_DIR, 'static/data/', name)
 
-            with open(path, newline='') as csvfile:
+            with open(path, encoding='utf-8', newline='') as csvfile:
                 data = csv.DictReader(csvfile)
 
                 for each in data:
