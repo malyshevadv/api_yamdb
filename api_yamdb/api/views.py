@@ -1,23 +1,28 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers, status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import mixins, serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import (LimitOffsetPagination,
+                                       PageNumberPagination)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
-from .permissions import (
-    IsAdmin, IsAuthor, IsModerator, ReadOnly, IsAuthenticated
-)
-from .serializers import (CommentSerializer, MeSerializer, ReviewSerializer,
-                          SignUpSerializer, TokenSerializer, UserSerializer)
+from .filters import TitleFilter
+from .permissions import (IsAdmin, IsAuthenticated, IsAuthor, IsModerator,
+                          ReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, MeSerializer, ReviewSerializer,
+                          SignUpSerializer, TitlePostSerializer,
+                          TitleSerializer, TokenSerializer, UserSerializer)
 
 
 def send_confirmation(user):
@@ -144,6 +149,7 @@ class ReviewViewSet(ModelViewSet):
         & (IsAuthor | IsModerator | IsAdmin)
         | ReadOnly
     ]
+    pagination_class = PageNumberPagination
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -156,3 +162,67 @@ class ReviewViewSet(ModelViewSet):
         title = get_object_or_404(Title, pk=title_id)
         author = self.request.user
         serializer.save(title=title, author=author)
+
+
+class CategoryViewSet(ModelViewSet):
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+    permission_classes = [
+        (IsAuthenticated & IsAdmin) | ReadOnly
+    ]
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name', ]
+
+    def retrieve(self, request, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def partial_update(self, request, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def destroy(self, request, **kwargs):
+        slug = self.kwargs.get('pk')
+        Category.objects.filter(slug=slug).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GenreViewSet(ModelViewSet):
+    serializer_class = GenreSerializer
+    queryset = Genre.objects.all()
+    permission_classes = [
+        (IsAuthenticated & IsAdmin) | ReadOnly
+    ]
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['name', ]
+
+    def retrieve(self, request, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def partial_update(self, request, **kwargs):
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def destroy(self, request, **kwargs):
+        slug = self.kwargs.get('pk')
+        Genre.objects.filter(slug=slug).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TitleViewSet(ModelViewSet):
+    queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
+    permission_classes = [
+        (IsAuthenticated & IsAdmin) | ReadOnly
+    ]
+    pagination_class = PageNumberPagination
+    filter_backends = [DjangoFilterBackend, ]
+    filterset_class = TitleFilter
+    filterset_fields = ['name', 'year', 'genre', 'category', ]
+    search_fields = ['genre']
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleSerializer
+        return TitlePostSerializer
+
+    def perform_create(self, serializer):
+        serializer.save()
