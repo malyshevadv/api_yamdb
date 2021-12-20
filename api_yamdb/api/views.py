@@ -165,8 +165,8 @@ class ReviewViewSet(ModelViewSet):
 
 
 class CategoryViewSet(ModelViewSet):
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    queryset = Category.objects.all()
     permission_classes = [
         (IsAuthenticated & IsAdmin) | ReadOnly
     ]
@@ -187,8 +187,8 @@ class CategoryViewSet(ModelViewSet):
 
 
 class GenreViewSet(ModelViewSet):
-    queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    queryset = Genre.objects.all()
     permission_classes = [
         (IsAuthenticated & IsAdmin) | ReadOnly
     ]
@@ -213,10 +213,10 @@ class TitleViewSet(ModelViewSet):
     permission_classes = [
         (IsAuthenticated & IsAdmin) | ReadOnly
     ]
+    pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = TitleFilter
     filterset_fields = ['name', 'year', 'genre', 'category', ]
-    pagination_class = PageNumberPagination
     search_fields = ['genre']
 
     def get_serializer_class(self):
