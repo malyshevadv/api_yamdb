@@ -1,8 +1,11 @@
-from django.contrib.auth import get_user_model
-from rest_framework import serializers
-from reviews.models import Category, Comment, Genre, Review, Title
-from rest_framework.serializers import UniqueTogetherValidator
+import datetime as dt
+from statistics import mean
 
+from django.contrib.auth import get_user_model
+from django.db import models
+from rest_framework import serializers
+from rest_framework.serializers import UniqueTogetherValidator
+from reviews.models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
 
@@ -80,3 +83,49 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Вы уже писали отзыв на это произведение.'
             )
         return attrs
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['name', 'slug', ]
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['name', 'slug', ]
+
+
+class TitleSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(
+        read_only=True
+    )
+    genre = GenreSerializer(
+        read_only=True,
+        many=True
+    )
+    rating = serializers.IntegerField(
+        read_only=True
+    )
+
+    class Meta:
+        model = Title
+        fields = '__all__'
+
+
+class TitlePostSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+        required=False
+    )
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        required=False, many=True
+    )
+
+    class Meta:
+        model = Title
+        fields = '__all__'
