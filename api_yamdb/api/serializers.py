@@ -69,3 +69,13 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
+
+    def validate(self, attrs):
+        if Review.objects.filter(
+                title_id=self.context['view'].kwargs['title_id'],
+                author=self.context['request'].user
+        ).exists():
+            raise serializers.ValidationError(
+                'Вы уже писали отзыв на это произведение.'
+            )
+        return attrs
