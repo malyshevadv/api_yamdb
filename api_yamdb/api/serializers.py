@@ -1,7 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Review, Title
+
 
 User = get_user_model()
 
@@ -31,7 +34,9 @@ class SignUpSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value in self.BANED_USERNAMES:
             raise serializers.ValidationError(
-                f'Использовать имя "{value}" в качестве username запрещено.'
+                {
+                    'username': f'Использовать имя "{value}" запрещено.'
+                }
             )
 
         return value
@@ -40,6 +45,24 @@ class SignUpSerializer(serializers.ModelSerializer):
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     confirmation_code = serializers.CharField()
+
+    def validate(self, data):
+        user = get_object_or_404(User, username=data.get('username'))
+
+        token_valid = default_token_generator.check_token(
+            user, data.get('confirmation_code')
+        )
+
+        if not token_valid:
+            raise serializers.ValidationError(
+                {
+                    'confirmation_code': 'Token is invalid or expired. Please '
+                                         'request another confirmation email '
+                                         'by signing in.'
+                }
+            )
+
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
