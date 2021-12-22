@@ -77,13 +77,13 @@ def signup(request):
         send_confirmation(user)
         return Response('Мы отправили код подтверждения на вашу почту.',
                         status=status.HTTP_200_OK)
-    else:
-        serializer = SignUpSerializer(data=request.data)
 
-        if serializer.is_valid():
-            user = serializer.save()
-            send_confirmation(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer = SignUpSerializer(data=request.data)
+
+    if serializer.is_valid():
+        user = serializer.save()
+        send_confirmation(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
