@@ -1,8 +1,10 @@
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.serializers import ValidationError
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
@@ -31,7 +33,7 @@ def send_confirmation(user):
     send_mail(
         'Email confirmation',
         f'Ваш код для подтверждения почты: {confirmation_code}',
-        'admin@me.to',
+        settings.DEFAULT_FROM_EMAIL,
         [user.email]
     )
 
@@ -76,15 +78,13 @@ def signup(request):
         send_confirmation(user)
         return Response('Мы отправили код подтверждения на вашу почту.',
                         status=status.HTTP_200_OK)
-    else:
-        serializer = SignUpSerializer(data=request.data)
 
-        if serializer.is_valid():
-            user = serializer.save()
-            send_confirmation(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer = SignUpSerializer(data=request.data)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if serializer.is_valid(raise_exception=True):
+        user = serializer.save()
+        send_confirmation(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -96,25 +96,24 @@ def get_token(request):
     """
     serializer = TokenSerializer(data=request.data)
 
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         user = get_object_or_404(User, username=request.data.get('username'))
 
         token_valid = default_token_generator.check_token(
             user, request.data.get('confirmation_code')
         )
 
-        if token_valid:
-            jwt_token = RefreshToken.for_user(user).access_token
+        if not token_valid:
+            raise ValidationError(
+                {'confirmation_code': 'Token is invalid or expired. Please '
+                                      'request another confirmation email by '
+                                      'signing in.'}
+            )
 
-            return Response({'token': str(jwt_token)},
-                            status=status.HTTP_200_OK)
+        jwt_token = str(RefreshToken.for_user(user).access_token)
 
-        return Response(
-            'Token is invalid or expired. Please request another '
-            'confirmation email by signing in.',
-            status=status.HTTP_400_BAD_REQUEST)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'token': jwt_token},
+                        status=status.HTTP_200_OK)
 
 
 class CommentViewSet(ModelViewSet):
