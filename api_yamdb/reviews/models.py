@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+import datetime as dt
+
 User = get_user_model()
 
 
@@ -43,7 +45,10 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
-    year = models.PositiveIntegerField('Год издания')
+    year = models.PositiveIntegerField(
+        'Год издания',
+        validators=[MaxValueValidator(dt.datetime.now().year)]
+    )
     description = models.TextField(
         'Описание',
         blank=True
