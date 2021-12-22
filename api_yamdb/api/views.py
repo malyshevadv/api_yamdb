@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
@@ -31,7 +32,7 @@ def send_confirmation(user):
     send_mail(
         'Email confirmation',
         f'Ваш код для подтверждения почты: {confirmation_code}',
-        'admin@me.to',
+        settings.DEFAULT_FROM_EMAIL,
         [user.email]
     )
 
