@@ -8,10 +8,12 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import RetrieveAPIView, UpdateAPIView
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import Category, Genre, Review, Title
@@ -151,7 +153,8 @@ class ReviewViewSet(ModelViewSet):
         serializer.save(title=title, author=author)
 
 
-class CategoryViewSet(ModelViewSet):
+class CategoryViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin,
+                      GenericViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
     permission_classes = [
@@ -159,21 +162,12 @@ class CategoryViewSet(ModelViewSet):
     ]
     pagination_class = PageNumberPagination
     filter_backends = [SearchFilter]
-    search_fields = ['name', ]
-
-    def retrieve(self, request, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def partial_update(self, request, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def destroy(self, request, **kwargs):
-        slug = self.kwargs.get('pk')
-        Category.objects.filter(slug=slug).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    search_fields = ('name', )
+    lookup_field = 'slug'
 
 
-class GenreViewSet(ModelViewSet):
+class GenreViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin,
+                   GenericViewSet):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
     permission_classes = [
@@ -181,18 +175,8 @@ class GenreViewSet(ModelViewSet):
     ]
     pagination_class = PageNumberPagination
     filter_backends = [SearchFilter]
-    search_fields = ['name', ]
-
-    def retrieve(self, request, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def partial_update(self, request, **kwargs):
-        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def destroy(self, request, **kwargs):
-        slug = self.kwargs.get('pk')
-        Genre.objects.filter(slug=slug).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    search_fields = ('name', )
+    lookup_field = 'slug'
 
 
 class TitleViewSet(ModelViewSet):
@@ -203,8 +187,8 @@ class TitleViewSet(ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = TitleFilter
-    filterset_fields = ['name', 'year', 'genre', 'category', ]
-    search_fields = ['genre']
+    filterset_fields = ('name', 'year', 'genre', 'category', )
+    search_fields = ('genre', )
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
