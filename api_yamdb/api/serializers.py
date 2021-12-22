@@ -30,8 +30,8 @@ class SignUpSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value in self.BANED_USERNAMES:
             raise serializers.ValidationError(
-                'Использовать имя "{}" в качестве username запрещено.'.format(
-                    value))
+                f'Использовать имя "{value}" в качестве username запрещено.'
+            )
 
         return value
 
