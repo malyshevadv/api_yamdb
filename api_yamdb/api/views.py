@@ -80,12 +80,10 @@ def signup(request):
 
     serializer = SignUpSerializer(data=request.data)
 
-    if serializer.is_valid():
+    if serializer.is_valid(raise_exception=True):
         user = serializer.save()
         send_confirmation(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
