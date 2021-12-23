@@ -81,11 +81,10 @@ def signup(request):
                         status=status.HTTP_200_OK)
 
     serializer = SignUpSerializer(data=request.data)
-
-    if serializer.is_valid(raise_exception=True):
-        user = serializer.save()
-        send_confirmation(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.save()
+    send_confirmation(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -96,14 +95,10 @@ def get_token(request):
     Если полученный код подтверждения валиден - отправляет юзеру JWT-токен.
     """
     serializer = TokenSerializer(data=request.data)
-
-    if serializer.is_valid(raise_exception=True):
-        user = get_object_or_404(User, username=request.data.get('username'))
-
-        jwt_token = str(RefreshToken.for_user(user).access_token)
-
-        return Response({'token': jwt_token},
-                        status=status.HTTP_200_OK)
+    serializer.is_valid(raise_exception=True)
+    user = get_object_or_404(User, username=request.data.get('username'))
+    jwt_token = str(RefreshToken.for_user(user).access_token)
+    return Response({'token': jwt_token}, status=status.HTTP_200_OK)
 
 
 class CommentViewSet(ModelViewSet):
